@@ -10,39 +10,34 @@ openai.api_key = os.getenv("OPENAI_API_KEY")    #  code accesses the API key thr
 #openai.api_key = os.environ["OPENAI_API_KEY"]
 
 
-# generate an answer from GPT-3
+# Generate an answer from GPT-3.5 Turbo or GPT-4
 def generate_answer(prompt):
     try:
-        response = openai.Completion.create(
-            engine="text-davinci-003",
-            prompt=prompt,
+        response = openai.ChatCompletion.create(
+            model="gpt-3.5-turbo",  # Or "gpt-4"
+            messages=[
+                {"role": "system", "content": "You are a helpful assistant."},    # defines the rules for how the AI should respond
+                {"role": "user", "content": prompt},
+            ],
             max_tokens=150,
-            n=1,
-            stop=None,
             temperature=0.7,
         )
-        return response.choices[0].text.strip()
-    except openai.error.AuthenticationError:
-        return "Authentication error: Please check your API key."
-    except openai.error.RateLimitError:
-        return "Rate limit exceeded: Please try again later."
+        return response['choices'][0]['message']['content']
     except openai.error.OpenAIError as e:
         return f"An error occurred: {e}"
 
 # Main program loop
-print("Welcome to the GPT-3 CLI! Type 'quit' to exit.")
+print("Hello! How can I help you? Type 'quit' to exit.")
 print("-" * 40)
 
-try:
-    while True:
-        question = input("What is your question? ")
-        if question.strip().lower() == "quit":
-            print("Goodbye!")
-            break
+while True:
+    question = input("What is your question? ")
+    if question.strip().lower() == "quit":
+        print("Goodbye!")
+        break
 
-        answer = generate_answer(question)
-        print("\nAnswer:")
-        print(answer)
-        print("-" * 40)
-except KeyboardInterrupt:
+    answer = generate_answer(question)
+    print("\nAnswer:")
+    print(answer)
+    print("-" * 40)
     print("\nGoodbye!")
